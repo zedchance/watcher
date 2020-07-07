@@ -101,7 +101,6 @@ class Commands(commands.Cog, command_attrs=dict(case_insensitive=True)):
                       description='Show your offline watchlist')
     async def list_command(self, ctx):
         """ Lists your offline watchlist """
-        print("LIST COMMAND INVOKED")
         watchlist = get_watchlist()
         author = ctx.message.author.id
         reply = f''
@@ -113,7 +112,6 @@ class Commands(commands.Cog, command_attrs=dict(case_insensitive=True)):
     @tasks.loop(seconds=60.0)
     async def check_watchlist(self):
         """ Checks the watchlist to see if anyone is offline """
-        print("RUNNING CHECK")
         watchlist = get_watchlist()
         members = self.bot.get_all_members()
         for member in members:
