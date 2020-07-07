@@ -1,5 +1,5 @@
 # watcher bot
-# Automatically sends notifications on online/offline status of a user
+# Automatically sends notifications when a user/bot goes offline
 
 import logging
 from discord.ext import commands
@@ -13,20 +13,18 @@ logging.basicConfig(filename='bot.log',
 
 # Prefix setup
 def get_prefix(client, message):
-    prefixes = ['watcher']
-    if message.content.startswith('watcher'):
-        logging.info(f'[{message.guild}/{message.channel}] {message.author}: {message.content}')
-    return commands.when_mentioned_or(*prefixes)(client, message)
+    logging.info(f'[{message.guild}/{message.channel}] {message.author}: {message.content}')
+    return commands.when_mentioned_or('watcher')(client, message)
 
 
 # Bot setup
 bot = commands.Bot(command_prefix=get_prefix,
-                   description='A description',
+                   description='A notification bot to tell you when other bots have gone down',
                    owner_id=owner_id,
                    case_insensitive=True)
 
 # Cog setup
-cogs = ['cogs.events']
+cogs = ['cogs.commands']
 
 
 @bot.event

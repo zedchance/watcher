@@ -1,3 +1,3 @@
 # watcher
 
-A discord bot that adds online/offline notifications for a user.
+A discord bot that watches if a user/bot goes offline.
