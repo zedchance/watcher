@@ -8,6 +8,7 @@ verify_ssl = true
 [packages]
 discord-py = "*"
 pyyaml = "*"
+pytz = "*"
 
 [requires]
 python_version = "3.7"

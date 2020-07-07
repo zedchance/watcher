@@ -1,8 +1,10 @@
 # events cog watches for change in user status
 
 import yaml
+import pytz
 import discord
 from discord.ext import commands, tasks
+from datetime import datetime
 
 
 def get_watchlist():
@@ -41,6 +43,19 @@ def add_to_watchlist(author, user_to_track, member_list):
     return True
 
 
+def del_from_watchlist(author, user_to_del):
+    """ Deletes a user from the author's watchlist """
+    watchlist = get_watchlist()
+    if watchlist is None or author not in watchlist:
+        return False
+    for entry in watchlist[author]:
+        if str(user_to_del).__contains__(str(entry['id'])):
+            watchlist[author].remove(entry)
+            write_watchlist(watchlist)
+            return True
+    return False
+
+
 class Commands(commands.Cog):
     """ Commands cog that watches for change in user status """
 
@@ -63,11 +78,24 @@ class Commands(commands.Cog):
         """ Adds a user to the offline watchlist """
         members = ctx.guild.members
         author = ctx.message.author.id
-        successful = add_to_watchlist(author, username, members)
-        if successful:
+        if add_to_watchlist(author, username, members):
             description = f'Added {username} to {ctx.message.author.mention}\'s offline watchlist'
         else:
             description = f'Didn\'t add the user'  # TODO make this handle the user already existing also
+        embed = discord.Embed(name='*watcher*', description=description)
+        return await ctx.send(embed=embed)
+
+    @commands.command(name='del',
+                      description='Delete a user from the offline watchlist',
+                      case_insensitive=True)
+    async def del_command(self, ctx, username):
+        """ Delete a user from the offline watchlist """
+        members = ctx.guild.members
+        author = ctx.message.author.id
+        if del_from_watchlist(author, username):
+            description = f'Deleted {username} from {ctx.message.author.mention}\'s offline watchlist'
+        else:
+            description = f'Didn\'t delete the user'
         embed = discord.Embed(name='*watcher*', description=description)
         return await ctx.send(embed=embed)
 
@@ -82,9 +110,13 @@ class Commands(commands.Cog):
                 for watch in watches:
                     if watch['id'] == member.id and str(member.status) == 'offline':
                         print("  ", member.name, member.status)
+                        time = datetime.now()
+                        timezone = pytz.timezone("America/Los_Angeles")
+                        pst_time = timezone.localize(time)
                         dm = self.bot.get_user(user)
                         embed = discord.Embed(name='*watcher*',
-                                              description=f'`{member.name}` is offline.')
+                                              description=f'`{member.name}` is offline.',
+                                              timestamp=pst_time)
                         await dm.send(embed=embed)
         return
 
