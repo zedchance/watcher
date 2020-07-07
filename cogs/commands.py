@@ -56,7 +56,7 @@ def del_from_watchlist(author, user_to_del):
     return False
 
 
-class Commands(commands.Cog):
+class Commands(commands.Cog, command_attrs=dict(case_insensitive=True)):
     """ Commands cog that watches for change in user status """
 
     def __init__(self, bot):
@@ -66,14 +66,13 @@ class Commands(commands.Cog):
     @commands.command(name='version',
                       description='Bot version',
                       aliases=['-v'],
-                      case_insensitive=True)
+                      hidden=True)
     async def version_command(self, ctx):
         """ Shows bot version number """
         return await ctx.send('Under development...')
 
     @commands.command(name='add',
-                      description='Add a user to the offline watchlist',
-                      case_insensitive=True)
+                      description='Add a user to the offline watchlist')
     async def add_command(self, ctx, username):
         """ Adds a user to the offline watchlist """
         members = ctx.guild.members
@@ -86,8 +85,7 @@ class Commands(commands.Cog):
         return await ctx.send(embed=embed)
 
     @commands.command(name='del',
-                      description='Delete a user from the offline watchlist',
-                      case_insensitive=True)
+                      description='Delete a user from the offline watchlist')
     async def del_command(self, ctx, username):
         """ Delete a user from the offline watchlist """
         members = ctx.guild.members
@@ -97,6 +95,19 @@ class Commands(commands.Cog):
         else:
             description = f'Didn\'t delete the user'
         embed = discord.Embed(name='*watcher*', description=description)
+        return await ctx.send(embed=embed)
+
+    @commands.command(name='list',
+                      description='Show your offline watchlist')
+    async def list_command(self, ctx):
+        """ Lists your offline watchlist """
+        print("LIST COMMAND INVOKED")
+        watchlist = get_watchlist()
+        author = ctx.message.author.id
+        reply = f''
+        for entry in watchlist[author]:
+            reply += f'<@!{entry["id"]}>\n'
+        embed = discord.Embed(title=f'{ctx.author}\'s offline watchlist', description=reply)
         return await ctx.send(embed=embed)
 
     @tasks.loop(seconds=60.0)
